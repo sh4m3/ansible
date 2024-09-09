@@ -1,0 +1,12 @@
+---
+- name: Obtener información del disco en un servidor Windows
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Obtener información del disco
+      win_disk_facts:
+      register: disk_info
+
+    - name: Mostrar información del disco
+      debug:
+        var: disk_info
