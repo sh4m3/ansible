@@ -4,7 +4,7 @@
   gather_facts: no
   tasks:
     - name: Obtener información del disco
-      win_disk_facts:
+      win_disk:
       register: disk_info
 
     - name: Mostrar información del disco
