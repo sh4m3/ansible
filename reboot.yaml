@@ -1,0 +1,8 @@
+---
+- name: Reiniciar el servidor Windows
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Reiniciar el servidor
+      win_reboot:
+        reboot_timeout: 600  # Tiempo de espera para reiniciar en segundos
