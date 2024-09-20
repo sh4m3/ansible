@@ -1,0 +1,9 @@
+---
+- name: Reiniciar el servicio Tomcat9
+  hosts: all
+  become: yes
+  tasks:
+    - name: Reiniciar Tomcat9
+      service:
+        name: tomcat9
+        state: restarted
