@@ -4,10 +4,11 @@
   gather_facts: no
   tasks:
     - name: Obtener información del disco
-      ansible.windows.win_disk:
+      community.windows.win_disk_facts:
       register: disk_info
 
     - name: Mostrar información del disco
       debug:
         var: disk_info
+
 
