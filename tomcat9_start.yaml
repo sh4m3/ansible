@@ -1,0 +1,9 @@
+---
+- name: Arrancar el servicio Tomcat9
+  hosts: all
+  become: yes
+  tasks:
+    - name: Arrancar Tomcat9
+      service:
+        name: tomcat9
+        state: started
