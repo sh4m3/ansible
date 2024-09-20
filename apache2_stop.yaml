@@ -1,5 +1,5 @@
 ---
-- name: Parar los servicios Apache2 y Tomcat9
+- name: Parar el servicio Apache2 
   hosts: all
   become: yes
   tasks:
