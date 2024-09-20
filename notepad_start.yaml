@@ -1,0 +1,8 @@
+---
+- name: Abrir notepad.exe en un servidor Windows
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Ejecutar notepad.exe
+      win_shell: 
+        cmd: "Start-Process notepad.exe"
