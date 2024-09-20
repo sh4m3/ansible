@@ -1,0 +1,8 @@
+- name: Arrancar los servicios Apache2 y Tomcat9
+  hosts: all
+  become: yes  # Necesario para gestionar servicios en Linux
+  tasks:
+    - name: Arrancar Apache2
+      service:
+        name: apache2
+        state: started
