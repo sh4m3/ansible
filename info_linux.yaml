@@ -1,0 +1,67 @@
+---
+- name: Obtener información detallada del sistema en un servidor Linux
+  hosts: all
+  gather_facts: yes  # Esto recopila información básica del sistema
+  tasks:
+    # Información del disco
+    - name: Obtener información del uso del disco
+      shell: df -h --output=source,size,used,avail,pcent,target
+      register: disk_info
+
+    - name: Mostrar información del disco
+      debug:
+        var: disk_info.stdout_lines
+
+    # Información de la memoria RAM
+    - name: Obtener información de la memoria RAM
+      shell: free -h
+      register: ram_info
+
+    - name: Mostrar información de la memoria RAM
+      debug:
+        var: ram_info.stdout_lines
+
+    # Información de la CPU
+    - name: Obtener información de la CPU
+      shell: lscpu
+      register: cpu_info
+
+    - name: Mostrar información de la CPU
+      debug:
+        var: cpu_info.stdout_lines
+
+    # Procesos con mayor uso de CPU
+    - name: Obtener los procesos con mayor uso de CPU
+      shell: ps -eo pid,comm,%cpu --sort=-%cpu | head -n 6
+      register: cpu_processes_info
+
+    - name: Mostrar los procesos con mayor uso de CPU
+      debug:
+        var: cpu_processes_info.stdout_lines
+
+    # Procesos con mayor uso de RAM
+    - name: Obtener los procesos con mayor uso de RAM
+      shell: ps -eo pid,comm,%mem --sort=-%mem | head -n 6
+      register: ram_processes_info
+
+    - name: Mostrar los procesos con mayor uso de RAM
+      debug:
+        var: ram_processes_info.stdout_lines
+
+    # Información de la paginación
+    - name: Obtener información de la paginación
+      shell: swapon --show
+      register: paging_info
+
+    - name: Mostrar información de la paginación
+      debug:
+        var: paging_info.stdout_lines
+
+    # Información del tráfico de red
+    - name: Obtener información del tráfico de red
+      shell: ip -s link
+      register: network_info
+
+    - name: Mostrar información del tráfico de red
+      debug:
+        var: network_info.stdout_lines
