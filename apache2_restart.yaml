@@ -1,0 +1,9 @@
+---
+- name: Reiniciar los servicios Apache2 y Tomcat9
+  hosts: all
+  become: yes
+  tasks:
+    - name: Reiniciar Apache2
+      service:
+        name: apache2
+        state: restarted
