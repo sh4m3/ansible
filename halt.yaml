@@ -1,0 +1,7 @@
+---
+- name: Apagar el servidor Windows
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Apagar el servidor
+      win_command: shutdown /s /t 0
