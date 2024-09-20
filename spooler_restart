@@ -1,0 +1,18 @@
+---
+- name: Reiniciar la cola de impresión en un servidor Windows
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Reiniciar el servicio de la cola de impresión (Spooler)
+      win_service:
+        name: Spooler
+        state: restarted
+
+    - name: Verificar el estado del servicio de la cola de impresión
+      win_service_info:
+        name: Spooler
+      register: spooler_info
+
+    - name: Mostrar el estado del servicio después del reinicio
+      debug:
+        var: spooler_info
