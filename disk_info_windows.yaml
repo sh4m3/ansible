@@ -1,13 +1,68 @@
 ---
-- name: Obtener información del disco en un servidor Windows
+- name: Obtener información detallada del sistema en un servidor Windows
   hosts: all
+  gather_facts: no
   tasks:
-    - name: Ejecutar PowerShell para obtener información del disco
-      win_command: powershell.exe Get-PhysicalDisk
+    # Información del disco
+    - name: Obtener información del espacio en disco
+      win_command: powershell.exe "Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{Name='FreeSpace(GB)';Expression={[math]::round($_.Free/1GB,2)}}, @{Name='UsedSpace(GB)';Expression={[math]::round(($_.Used/1GB),2)}}, @{Name='TotalSize(GB)';Expression={[math]::round($_.Used/1GB + $_.Free/1GB,2)}}"
       register: disk_info
 
-    - name: Mostrar información del disco
+    - name: Mostrar información del espacio en disco
       debug:
         var: disk_info.stdout_lines
 
+    # Información de la memoria RAM
+    - name: Obtener información de la memoria RAM
+      win_command: powershell.exe "Get-WmiObject -Class Win32_OperatingSystem | Select-Object TotalVisibleMemorySize,FreePhysicalMemory"
+      register: ram_info
+
+    - name: Mostrar información de la memoria RAM
+      debug:
+        var: ram_info.stdout_lines
+
+    # Información de los procesadores
+    - name: Obtener información de los procesadores
+      win_command: powershell.exe "Get-WmiObject -Class Win32_Processor | Select-Object Name, NumberOfCores, NumberOfLogicalProcessors"
+      register: cpu_info
+
+    - name: Mostrar información de los procesadores
+      debug:
+        var: cpu_info.stdout_lines
+
+    # Procesos con mayor uso de CPU
+    - name: Obtener los procesos con mayor uso de CPU
+      win_command: powershell.exe "Get-Process | Sort-Object CPU -Descending | Select-Object -First 5 Id,ProcessName,CPU"
+      register: cpu_processes_info
+
+    - name: Mostrar los procesos con mayor uso de CPU
+      debug:
+        var: cpu_processes_info.stdout_lines
+
+    # Procesos con mayor uso de RAM
+    - name: Obtener los procesos con mayor uso de RAM
+      win_command: powershell.exe "Get-Process | Sort-Object WS -Descending | Select-Object -First 5 Id,ProcessName,@{Name='MemoryUsed(GB)';Expression={[math]::round($_.WS/1GB,2)}}"
+      register: ram_processes_info
+
+    - name: Mostrar los procesos con mayor uso de RAM
+      debug:
+        var: ram_processes_info.stdout_lines
+
+    # Información de la paginación
+    - name: Obtener información de la paginación
+      win_command: powershell.exe "Get-WmiObject -Class Win32_PageFileUsage | Select-Object Name,CurrentUsage,PeakUsage"
+      register: paging_info
+
+    - name: Mostrar información de la paginación
+      debug:
+        var: paging_info.stdout_lines
+
+    # Información del tráfico de red
+    - name: Obtener información del tráfico de red
+      win_command: powershell.exe "Get-NetAdapterStatistics | Select-Object Name,ReceivedBytes,SentBytes"
+      register: network_info
+
+    - name: Mostrar información del tráfico de red
+      debug:
+        var: network_info.stdout_lines
 
