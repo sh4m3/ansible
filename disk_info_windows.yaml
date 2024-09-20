@@ -1,14 +1,13 @@
 ---
 - name: Obtener información del disco en un servidor Windows
   hosts: all
-  gather_facts: no
   tasks:
-    - name: Obtener información del disco
-      community.windows.win_disk_facts:
+    - name: Ejecutar PowerShell para obtener información del disco
+      win_command: powershell.exe Get-PhysicalDisk
       register: disk_info
 
     - name: Mostrar información del disco
       debug:
-        var: disk_info
+        var: disk_info.stdout_lines
 
 
