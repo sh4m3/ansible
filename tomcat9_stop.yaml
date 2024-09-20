@@ -1,0 +1,9 @@
+---
+- name: Parar el servicio Tomcat9
+  hosts: all
+  become: yes
+  tasks:
+    - name: Parar Tomcat9
+      service:
+        name: tomcat9
+        state: stopped
