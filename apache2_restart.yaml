@@ -1,5 +1,5 @@
 ---
-- name: Reiniciar los servicios Apache2 y Tomcat9
+- name: Reiniciar el servicio Apache2
   hosts: all
   become: yes
   tasks:
