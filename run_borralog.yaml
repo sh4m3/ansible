@@ -4,4 +4,4 @@
   gather_facts: no
   tasks:
     - name: Ejecutar el archivo .bat
-      win_command: 'start /b F:\COSMOS\Cosmos7.4.2\bin\cosrun.exe -prj F:\CLI\gestiopticas\gestiopticas.prj -arg "-CONNECTION GESTIOPTICAS -USER BORRALOG -OMD borralog -WINDOW FALSE"'
+      win_command: "start /b F:\COSMOS\Cosmos7.4.2\bin\cosrun.exe -prj F:\CLI\gestiopticas\gestiopticas.prj -arg '-CONNECTION GESTIOPTICAS -USER BORRALOG -OMD borralog -WINDOW FALSE'"
