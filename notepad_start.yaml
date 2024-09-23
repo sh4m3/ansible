@@ -3,6 +3,5 @@
   hosts: all
   gather_facts: no
   tasks:
-    - name: Ejecutar notepad.exe
-      win_shell: 
-        cmd: "Start-Process notepad.exe"
+    - name: Abrir notepad.exe
+      win_shell: Start-Process "notepad.exe"
