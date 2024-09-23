@@ -1,0 +1,7 @@
+---
+- name: Ejecutar un archivo .bat en un servidor Windows
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Ejecutar el archivo .bat
+      win_command: 'C:\note.bat'
