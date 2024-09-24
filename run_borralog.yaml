@@ -1,7 +1,10 @@
 ---
-- name: Ejecutar un archivo .bat en un servidor Windows
-  hosts: all
-  gather_facts: no
+- name: Iniciar programa Cosmos en Windows
+  hosts: windows
   tasks:
-    - name: Ejecutar el archivo .bat
-      win_command: "start /b F:\COSMOS\Cosmos7.4.2\bin\cosrun.exe -prj F:\CLI\gestiopticas\gestiopticas.prj"
+    - name: Ejecutar cosrun.exe con los parámetros especificados
+      win_command: >
+        F:\COSMOS\Cosmos7.4.2\bin\cosrun.exe -prj F:\CLI\gestiopticas\gestiopticas.prj -arg "-CONNECTION GESTIOPTICAS -USER BORRALOG -OMD borralog -WINDOW FALSE"
+      args:
+        chdir: F:\COSMOS\Cosmos7.4.2\bin\
+
