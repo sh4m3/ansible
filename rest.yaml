@@ -1,6 +1,7 @@
 ---
 - name: Realizar solicitud POST al servicio web con autorización y procesar JSON
   hosts: localhost
+  connection: local 
   gather_facts: no
 
   vars:
