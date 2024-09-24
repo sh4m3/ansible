@@ -1,6 +1,6 @@
 ---
 - name: Descargar todos los archivos .txt desde un FTP usando PowerShell
-  hosts: windows
+  hosts: all
   tasks:
     - name: Crear directorio local si no existe
       win_file:
