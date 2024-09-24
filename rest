@@ -1,0 +1,44 @@
+---
+- name: Realizar solicitud POST al servicio web con autorización y procesar JSON
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    api_url: "https://g2pedidos.greensysit.net/xfact/api/GetServidores"
+    bearer_token: "vvvvvvvv"  # Reemplaza con tu token real
+
+  tasks:
+    - name: Realizar una solicitud POST con autorización Bearer
+      uri:
+        url: "{{ api_url }}"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+          Authorization: "Bearer {{ bearer_token }}"
+        body_format: json
+        return_content: yes
+        status_code: 200
+      register: web_response
+
+    - name: Parsear el JSON de la respuesta del servicio web
+      set_fact:
+        servidores: "{{ web_response.json }}"
+
+    - name: Mostrar la respuesta completa
+      debug:
+        var: servidores
+
+    - name: Mostrar información detallada de cada servidor
+      loop: "{{ servidores }}"
+      vars:
+        servidor_info: "{{ item }}"
+      debug:
+        msg: |
+          ID: {{ servidor_info.id }}
+          Servidor: {{ servidor_info.servidor }}
+          CPU: {{ servidor_info.cpu }}
+          RAM: {{ servidor_info.ram }} GB
+          Disco: {{ servidor_info.disco }} GB
+          Apagado: {{ servidor_info.apagado | bool }}
+          Sistema Operativo: {{ servidor_info.so }}
+
