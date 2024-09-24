@@ -66,9 +66,9 @@
       win_shell: powershell.exe -ExecutionPolicy Bypass -File C:\update\download_ftp.ps1
       register: script_output
 
-    - name: Mostrar la salida del script PowerShell
+    - name: Mostrar la salida del script PowerShell con saltos de línea
       debug:
-        var: script_output.stdout
+        var: script_output.stdout_lines
 
     - name: Eliminar el script PowerShell
       win_file:
