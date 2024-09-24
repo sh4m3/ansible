@@ -7,33 +7,38 @@
         path: C:\update
         state: directory
 
-    - name: Descargar todos los archivos .txt desde FTP usando PowerShell
-      win_shell: |
-        $ftpServer = "ftp://10.15.1.26/"
-        $username = "update"
-        $password = "Y3lm020."
-        $localPath = "C:\\update\\"
-        
-        $ftpRequest = [System.Net.FtpWebRequest]::Create($ftpServer)
-        $ftpRequest.Method = [System.Net.WebRequestMethods+Ftp]::ListDirectory
-        $ftpRequest.Credentials = New-Object System.Net.NetworkCredential($username, $password)
-        
-        $response = $ftpRequest.GetResponse()
-        $responseStream = $response.GetResponseStream()
-        $reader = New-Object System.IO.StreamReader($responseStream)
-        $fileList = $reader.ReadToEnd()
-        $reader.Close()
-        $response.Close()
+    - name: Crear script PowerShell en el servidor
+      win_copy:
+        content: |
+          $ftpServer = "ftp://10.15.1.26/"
+          $username = "update"
+          $password = "Y3lm020."
+          $localPath = "C:\\update\\"
+          
+          $ftpRequest = [System.Net.FtpWebRequest]::Create($ftpServer)
+          $ftpRequest.Method = [System.Net.WebRequestMethods+Ftp]::ListDirectory
+          $ftpRequest.Credentials = New-Object System.Net.NetworkCredential($username, $password)
+          
+          $response = $ftpRequest.GetResponse()
+          $responseStream = $response.GetResponseStream()
+          $reader = New-Object System.IO.StreamReader($responseStream)
+          $fileList = $reader.ReadToEnd()
+          $reader.Close()
+          $response.Close()
 
-        # Filtrar los archivos que terminan en .txt
-        $txtFiles = $fileList -split "`n" | Where-Object { $_ -match '\\.txt$' }
+          # Filtrar los archivos que terminan en .txt
+          $txtFiles = $fileList -split "`n" | Where-Object { $_ -match '\.txt$' }
 
-        # Descargar cada archivo .txt
-        $webclient = New-Object System.Net.WebClient
-        $webclient.Credentials = New-Object System.Net.NetworkCredential($username, $password)
-        
-        foreach ($file in $txtFiles) {
-          $remoteFile = $ftpServer + $file.Trim()
-          $localFile = $localPath + $file.Trim()
-          $webclient.DownloadFile($remoteFile, $localFile)
-        }
+          # Descargar cada archivo .txt
+          $webclient = New-Object System.Net.WebClient
+          $webclient.Credentials = New-Object System.Net.NetworkCredential($username, $password)
+          
+          foreach ($file in $txtFiles) {
+            $remoteFile = $ftpServer + $file.Trim()
+            $localFile = $localPath + $file.Trim()
+            $webclient.DownloadFile($remoteFile, $localFile)
+          }
+        dest: C:\update\download_ftp.ps1
+
+    - name: Ejecutar el script PowerShell
+      win_shell: powershell.exe -ExecutionPolicy Bypass -File C:\update\download_ftp.ps1
