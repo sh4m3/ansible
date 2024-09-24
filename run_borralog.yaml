@@ -1,6 +1,6 @@
 ---
 - name: Iniciar programa Cosmos en Windows
-  hosts: windows
+  hosts: all
   tasks:
     - name: Ejecutar cosrun.exe con los parámetros especificados
       win_shell: >
