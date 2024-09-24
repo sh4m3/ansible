@@ -58,10 +58,23 @@
           }
         dest: C:\update\download_ftp.ps1
 
-    - name: Ejecutar el script PowerShell
+    - name: Mostrar script creado en el servidor
+      debug:
+        msg: "Script PowerShell creado en: C:\\update\\download_ftp.ps1"
+
+    - name: Ejecutar el script PowerShell y capturar la salida
       win_shell: powershell.exe -ExecutionPolicy Bypass -File C:\update\download_ftp.ps1
+      register: script_output
+
+    - name: Mostrar la salida del script PowerShell
+      debug:
+        var: script_output.stdout
 
     - name: Eliminar el script PowerShell
       win_file:
         path: C:\update\download_ftp.ps1
         state: absent
+
+    - name: Confirmar la eliminación del script PowerShell
+      debug:
+        msg: "Script PowerShell eliminado del servidor."
