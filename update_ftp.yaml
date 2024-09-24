@@ -9,10 +9,10 @@
 
     - name: Descargar todos los archivos .txt desde FTP con PowerShell
       win_shell: |
-        $ftpServer = "ftp://10.15.1.26/"
-        $username = "update"
-        $password = "Y3lm020."
-        $localPath = "C:\\update\\"
+        $ftpServer = 'ftp://10.15.1.26/'
+        $username = 'update'
+        $password = 'Y3lm020.'
+        $localPath = 'C:\\update\\'
         
         $ftpRequest = [System.Net.FtpWebRequest]::Create($ftpServer)
         $ftpRequest.Method = [System.Net.WebRequestMethods+Ftp]::ListDirectory
