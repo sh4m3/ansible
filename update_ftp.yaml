@@ -1,0 +1,35 @@
+---
+- name: Descargar todos los archivos .txt desde un FTP usando PowerShell
+  hosts: all
+  tasks:
+    - name: Descargar todos los archivos .txt desde FTP con PowerShell
+      win_shell: |
+        $ftpServer = "ftp://10.15.1.26/"
+        $username = "update"
+        $password = "Y3lm020."
+        $localPath = "C:\\update\\"
+        
+        $ftpRequest = [System.Net.FtpWebRequest]::Create($ftpServer)
+        $ftpRequest.Method = [System.Net.WebRequestMethods+Ftp]::ListDirectory
+        $ftpRequest.Credentials = New-Object System.Net.NetworkCredential($username, $password)
+        
+        $response = $ftpRequest.GetResponse()
+        $responseStream = $response.GetResponseStream()
+        $reader = New-Object System.IO.StreamReader($responseStream)
+        $fileList = $reader.ReadToEnd()
+        $reader.Close()
+        $response.Close()
+
+        # Filtrar los archivos que terminan en .txt
+        $txtFiles = $fileList -split "`n" | Where-Object { $_ -match '\.txt$' }
+
+        # Descargar cada archivo .txt
+        $webclient = New-Object System.Net.WebClient
+        $webclient.Credentials = New-Object System.Net.NetworkCredential($username, $password)
+        
+        foreach ($file in $txtFiles) {
+          $remoteFile = $ftpServer + $file.Trim()
+          $localFile = $localPath + $file.Trim()
+          $webclient.DownloadFile($remoteFile, $localFile)
+        }
+
