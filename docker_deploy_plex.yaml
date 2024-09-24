@@ -44,7 +44,7 @@
         enabled: true
 
     - name: Descargar la imagen de Plex desde Docker Hub
-      docker_image:
+      community.docker.docker_image:
         name: linuxserver/plex
         source: pull
 
@@ -65,7 +65,7 @@
         mode: '0755'
 
     - name: Ejecutar un contenedor de Plex en Docker
-      docker_container:
+      community.docker.docker_container:
         name: plex
         image: linuxserver/plex
         state: started
@@ -83,11 +83,3 @@
         volumes:
           - /opt/plex/config:/config
           - /opt/plex/data:/data
-        environment:
-          - PUID=1000
-          - PGID=1000
-          - VERSION=docker
-
-    - name: Mostrar la URL de Plex
-      debug:
-        msg: "El servidor Plex está desplegado y disponible en http://{{ ansible_default_ipv4.address }}:32400/web"
