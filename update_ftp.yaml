@@ -7,12 +7,12 @@
         path: C:\update
         state: directory
 
-    - name: Descargar todos los archivos .txt desde FTP usando PowerShell con bloque raw
-      raw: |
-        $ftpServer = 'ftp://10.15.1.26'
-        $username = 'update'
-        $password = 'Y3lm020.'
-        $localPath = 'C:\\update\\'
+    - name: Descargar todos los archivos .txt desde FTP usando PowerShell
+      win_shell: |
+        $ftpServer = "ftp://10.15.1.26/"
+        $username = "update"
+        $password = "Y3lm020."
+        $localPath = "C:\\update\\"
         
         $ftpRequest = [System.Net.FtpWebRequest]::Create($ftpServer)
         $ftpRequest.Method = [System.Net.WebRequestMethods+Ftp]::ListDirectory
@@ -26,7 +26,7 @@
         $response.Close()
 
         # Filtrar los archivos que terminan en .txt
-        $txtFiles = $fileList -split "`n" | Where-Object { $_ -match '\.txt$' }
+        $txtFiles = $fileList -split "`n" | Where-Object { $_ -match '\\.txt$' }
 
         # Descargar cada archivo .txt
         $webclient = New-Object System.Net.WebClient
