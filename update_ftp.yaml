@@ -9,7 +9,7 @@
 
     - name: Descargar todos los archivos .txt desde FTP usando PowerShell con bloque raw
       raw: |
-        $ftpServer = 'ftp://10.15.1.26/'
+        $ftpServer = 'ftp://10.15.1.26'
         $username = 'update'
         $password = 'Y3lm020.'
         $localPath = 'C:\\update\\'
