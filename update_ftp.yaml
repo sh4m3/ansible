@@ -7,8 +7,8 @@
         path: C:\update
         state: directory
 
-    - name: Descargar todos los archivos .txt desde FTP con PowerShell
-      win_shell: |
+    - name: Descargar todos los archivos .txt desde FTP usando PowerShell con bloque raw
+      raw: |
         $ftpServer = 'ftp://10.15.1.26/'
         $username = 'update'
         $password = 'Y3lm020.'
