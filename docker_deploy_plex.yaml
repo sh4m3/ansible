@@ -1,70 +1,15 @@
 ---
-- name: Desplegar un contenedor de Docker con Plex
+- name: Desplegar Plex en Docker
   hosts: all
   become: true
   tasks:
-
-    - name: Instalar los paquetes necesarios para Docker
-      apt:
-        name: "{{ item }}"
-        state: present
-        update_cache: yes
-      loop:
-        - apt-transport-https
-        - ca-certificates
-        - curl
-        - gnupg
-        - lsb-release
-
-    - name: Añadir la clave GPG oficial de Docker
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
-
-    - name: Añadir el repositorio oficial de Docker
-      apt_repository:
-        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-        state: present
-
-    - name: Instalar Docker
-      apt:
-        name: docker-ce
-        state: present
-        update_cache: yes
-
-    - name: Instalar Docker-Compose (opcional si se requiere)
-      apt:
-        name: docker-compose
-        state: present
-
-    - name: Asegurarse de que Docker está corriendo
-      service:
-        name: docker
-        state: started
-        enabled: true
-
+  
     - name: Descargar la imagen de Plex desde Docker Hub
       community.docker.docker_image:
         name: linuxserver/plex
         source: pull
 
-    - name: Crear un directorio para la configuración de Plex
-      file:
-        path: /opt/plex/config
-        state: directory
-        owner: root
-        group: root
-        mode: '0755'
-
-    - name: Crear un directorio para los datos de Plex (medios)
-      file:
-        path: /opt/plex/data
-        state: directory
-        owner: root
-        group: root
-        mode: '0755'
-
-    - name: Ejecutar un contenedor de Plex en Docker
+    - name: Ejecutar contenedor de Plex
       community.docker.docker_container:
         name: plex
         image: linuxserver/plex
@@ -83,3 +28,7 @@
         volumes:
           - /opt/plex/config:/config
           - /opt/plex/data:/data
+        environment:
+          - PUID=1000
+          - PGID=1000
+          - VERSION=docker
