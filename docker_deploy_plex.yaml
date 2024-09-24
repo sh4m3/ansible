@@ -1,0 +1,93 @@
+---
+- name: Desplegar un contenedor de Docker con Plex
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Instalar los paquetes necesarios para Docker
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg
+        - lsb-release
+
+    - name: Añadir la clave GPG oficial de Docker
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Añadir el repositorio oficial de Docker
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Instalar Docker
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+
+    - name: Instalar Docker-Compose (opcional si se requiere)
+      apt:
+        name: docker-compose
+        state: present
+
+    - name: Asegurarse de que Docker está corriendo
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Descargar la imagen de Plex desde Docker Hub
+      docker_image:
+        name: linuxserver/plex
+        source: pull
+
+    - name: Crear un directorio para la configuración de Plex
+      file:
+        path: /opt/plex/config
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Crear un directorio para los datos de Plex (medios)
+      file:
+        path: /opt/plex/data
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Ejecutar un contenedor de Plex en Docker
+      docker_container:
+        name: plex
+        image: linuxserver/plex
+        state: started
+        restart_policy: always
+        ports:
+          - "32400:32400"
+          - "3005:3005"
+          - "8324:8324"
+          - "32469:32469"
+          - "1900:1900/udp"
+          - "32410:32410/udp"
+          - "32412:32412/udp"
+          - "32413:32413/udp"
+          - "32414:32414/udp"
+        volumes:
+          - /opt/plex/config:/config
+          - /opt/plex/data:/data
+        environment:
+          - PUID=1000
+          - PGID=1000
+          - VERSION=docker
+
+    - name: Mostrar la URL de Plex
+      debug:
+        msg: "El servidor Plex está desplegado y disponible en http://{{ ansible_default_ipv4.address }}:32400/web"
