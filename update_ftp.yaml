@@ -7,7 +7,7 @@
         path: C:\update
         state: directory
 
-    - name: Crear script PowerShell en el servidor con depuración
+    - name: Crear script PowerShell en el servidor con ajuste de filtro de archivos
       win_copy:
         content: |
           $ftpServer = "ftp://10.15.1.26/"
@@ -32,8 +32,8 @@
 
             Write-Host "Lista de archivos obtenida: `n$fileList"
 
-            # Filtrar los archivos que terminan en .txt
-            $txtFiles = $fileList -split "`n" | Where-Object { $_ -match '\.txt$' }
+            # Limpiar los nombres de los archivos
+            $txtFiles = $fileList -split "`r?`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ -match '\.txt$' }
 
             if ($txtFiles.Count -eq 0) {
                 Write-Host "No se encontraron archivos .txt en el directorio FTP."
@@ -46,8 +46,8 @@
             $webclient.Credentials = New-Object System.Net.NetworkCredential($username, $password)
 
             foreach ($file in $txtFiles) {
-              $remoteFile = $ftpServer + $file.Trim()
-              $localFile = $localPath + $file.Trim()
+              $remoteFile = $ftpServer + $file
+              $localFile = $localPath + $file
               Write-Host "Descargando archivo $remoteFile a $localFile"
               $webclient.DownloadFile($remoteFile, $localFile)
             }
