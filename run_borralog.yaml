@@ -3,8 +3,12 @@
   hosts: windows
   tasks:
     - name: Ejecutar cosrun.exe con los parámetros especificados
-      win_command: >
+      win_shell: >
         F:\COSMOS\Cosmos7.4.2\bin\cosrun.exe -prj F:\CLI\gestiopticas\gestiopticas.prj -arg "-CONNECTION GESTIOPTICAS -USER BORRALOG -OMD borralog -WINDOW FALSE"
       args:
         chdir: F:\COSMOS\Cosmos7.4.2\bin\
+      register: resultado
+    - name: Mostrar el resultado del comando
+      debug:
+        var: resultado
 
