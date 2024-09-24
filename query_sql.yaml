@@ -4,7 +4,7 @@
   tasks:
     - name: Ejecutar consulta SQL
       win_shell: |
-        sqlcmd -S ALDERAAN2019\SQL2016 -U PgaSysU -P PgaSysU -d PGADATWG -Q "SELECT TOP 100 * FROM ARTICULOS"
+        sqlcmd -S ALDERAAN2019\SQL2016 -U PgaSysU -P PgaSysU -d PGADATWG -Q "SELECT TOP 100 * FROM ARTICULOS" -W -s "," 
       register: sql_output
 
     - name: Mostrar el resultado de la consulta SQL
