@@ -1,7 +1,12 @@
 ---
 - name: Descargar todos los archivos .txt desde un FTP usando PowerShell
-  hosts: all
+  hosts: windows
   tasks:
+    - name: Crear directorio local si no existe
+      win_file:
+        path: C:\update
+        state: directory
+
     - name: Descargar todos los archivos .txt desde FTP con PowerShell
       win_shell: |
         $ftpServer = "ftp://10.15.1.26/"
@@ -32,4 +37,3 @@
           $localFile = $localPath + $file.Trim()
           $webclient.DownloadFile($remoteFile, $localFile)
         }
-
