@@ -1,0 +1,12 @@
+---
+- name: Consultar base de datos SQL Server usando sqlcmd
+  hosts: all
+  tasks:
+    - name: Ejecutar consulta SQL
+      win_shell: |
+        sqlcmd -S ALDERAAN2019\SQL2016 -U PgaSysU -P PgaSysU -d PGADATWG -Q "SELECT TOP 100 * FROM ARTICULOS"
+      register: sql_output
+
+    - name: Mostrar el resultado de la consulta SQL
+      debug:
+        var: sql_output.stdout
