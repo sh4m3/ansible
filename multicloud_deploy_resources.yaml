@@ -1,0 +1,83 @@
+---
+- name: Despliegue de una aplicación en múltiples nubes con configuración de red
+  hosts: localhost
+  tasks:
+    - name: Crear VPC en AWS
+      ec2_vpc_net:
+        name: my-vpc
+        cidr_block: 10.0.0.0/16
+        region: us-east-1
+        state: present
+      register: aws_vpc
+
+    - name: Crear Subnet en AWS
+      ec2_vpc_subnet:
+        vpc_id: "{{ aws_vpc.vpc.id }}"
+        cidr: 10.0.1.0/24
+        az: us-east-1a
+        state: present
+      register: aws_subnet
+
+    - name: Crear reglas de firewall en AWS
+      ec2_group:
+        name: my-sg
+        description: Security Group para mis instancias EC2
+        vpc_id: "{{ aws_vpc.vpc.id }}"
+        rules:
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 80
+            to_port: 80
+            cidr_ip: 0.0.0.0/0
+        region: us-east-1
+
+    - name: Crear red virtual en Azure
+      azure_rm_virtualnetwork:
+        resource_group: myResourceGroup
+        name: my-vnet
+        address_prefixes: 10.1.0.0/16
+
+    - name: Crear subred en Azure
+      azure_rm_subnet:
+        resource_group: myResourceGroup
+        virtual_network: my-vnet
+        name: my-subnet
+        address_prefix: 10.1.1.0/24
+
+    - name: Crear firewall en Azure
+      azure_rm_securitygroup:
+        resource_group: myResourceGroup
+        name: my-firewall
+        rules:
+          - name: SSH
+            access: Allow
+            direction: Inbound
+            priority: 100
+            protocol: Tcp
+            source_address_prefix: "*"
+            destination_address_prefix: "*"
+            destination_port_range: 22
+
+    - name: Crear red VPC en GCP
+      gcp_compute_network:
+        name: my-vpc
+        auto_create_subnetworks: no
+
+    - name: Crear subred en GCP
+      gcp_compute_subnetwork:
+        name: my-subnet
+        region: us-central1
+        network: my-vpc
+        ip_cidr_range: 10.2.0.0/24
+
+    - name: Configurar reglas de firewall en GCP
+      gcp_compute_firewall:
+        name: allow-ssh
+        network: my-vpc
+        allowed:
+          - ip_protocol: tcp
+            ports: ["22"]
+        source_ranges: ["0.0.0.0/0"]

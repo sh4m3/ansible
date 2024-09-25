@@ -1,0 +1,26 @@
+---
+- name: Monitoreo centralizado con Prometheus y Grafana
+  hosts: monitoring
+  become: yes
+  tasks:
+    - name: Instalar Prometheus
+      apt:
+        name: prometheus
+        state: present
+
+    - name: Configurar Prometheus para monitorizar AWS, Azure y GCP
+      template:
+        src: templates/prometheus.yml.j2
+        dest: /etc/prometheus/prometheus.yml
+      notify: restart prometheus
+
+    - name: Instalar Grafana
+      apt:
+        name: grafana
+        state: present
+
+    - name: Crear dashboard de Grafana
+      grafana_dashboard:
+        grafana_url: "http://localhost:3000"
+        name: "Multi-Cloud Monitoring"
+        state: present

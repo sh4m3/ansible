@@ -1,0 +1,29 @@
+---
+- name: Configuración de balanceadores de carga en múltiples nubes
+  hosts: localhost
+  tasks:
+    - name: Crear Load Balancer en AWS
+      ec2_elb_lb:
+        name: my-elb
+        state: present
+        subnets:
+          - "{{ aws_subnet.subnet.id }}"
+        listeners:
+          - protocol: http
+            load_balancer_port: 80
+            instance_port: 80
+        region: us-east-1
+
+    - name: Crear Load Balancer en Azure
+      azure_rm_loadbalancer:
+        resource_group: myResourceGroup
+        name: my-lb
+        location: eastus
+        frontend_ip_configuration:
+          name: my-frontend
+          public_ip_address_name: my-pip
+
+    - name: Crear Load Balancer en GCP
+      gcp_compute_target_pool:
+        name: my-target-pool
+        region: us-central1

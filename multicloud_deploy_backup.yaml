@@ -1,0 +1,21 @@
+---
+- name: Configurar backups automáticos en AWS, Azure y GCP
+  hosts: all
+  tasks:
+    - name: Configurar backup en AWS
+      ec2_snapshot:
+        volume_id: "{{ ec2_volume_id }}"
+        description: "Backup automático de volumen AWS"
+        region: us-east-1
+
+    - name: Configurar backup en Azure
+      azure_rm_snapshot:
+        resource_group: myResourceGroup
+        disk_name: my-disk
+        name: my-snapshot
+
+    - name: Configurar backup en GCP
+      gcp_compute_disk_snapshot:
+        name: my-disk-snapshot
+        source_disk: my-disk
+        zone: us-central1-a
