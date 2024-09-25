@@ -1,0 +1,28 @@
+---
+- name: Obtener costos de AWS
+  hosts: localhost
+  tasks:
+    - name: Consultar costos en AWS usando la API de Cost Explorer
+      uri:
+        url: "https://ce.us-east-1.amazonaws.com"
+        method: POST
+        headers:
+          Content-Type: "application/x-amz-json-1.1"
+          X-Amz-Target: "AWSInsightsIndexService.GetCostAndUsage"
+          Authorization: "AWS4-HMAC-SHA256 Credential={{ aws_access_key }}/{{ aws_secret_key }}"
+        body: |
+          {
+            "TimePeriod": {
+              "Start": "{{ (ansible_date_time.date | regex_replace('-','')) | string }}",
+              "End": "{{ (ansible_date_time.date | regex_replace('-','') | string) }}"
+            },
+            "Granularity": "DAILY",
+            "Metrics": ["BlendedCost"]
+          }
+        return_content: yes
+      register: aws_costs
+
+    - name: Mostrar gastos de AWS
+      debug:
+        msg: "Costos de AWS: {{ aws_costs.json['ResultsByTime'][0]['Total']['BlendedCost']['Amount'] }} USD"
+

@@ -1,0 +1,21 @@
+---
+- name: Obtener costos de Azure
+  hosts: localhost
+  tasks:
+    - name: Consultar costos en Azure
+      uri:
+        url: "https://management.azure.com/subscriptions/{{ azure_subscription_id }}/providers/Microsoft.CostManagement/query?api-version=2021-01-01"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ lookup('community.general.azure_rm.get_token', {'tenant': azure_tenant_id, 'client': azure_client_id, 'secret': azure_client_secret, 'resource': 'https://management.azure.com/'}) }}"
+        body: |
+          {
+            "type": "ActualCost",
+            "timeframe": "MonthToDate"
+          }
+        return_content: yes
+      register: azure_costs
+
+    - name: Mostrar gastos de Azure
+      debug:
+        msg: "Costos de Azure: {{ azure_costs.json['properties']['rows'][0][0] }} USD"

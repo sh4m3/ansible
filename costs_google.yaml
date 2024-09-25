@@ -1,0 +1,13 @@
+---
+- name: Obtener costos de GCP
+  hosts: localhost
+  tasks:
+    - name: Consultar costos en GCP
+      gcp_billing_account_info:
+        project: "{{ gcp_project_id }}"
+        credentials_file: "{{ gcp_credentials_file }}"
+      register: gcp_billing_info
+
+    - name: Mostrar costos de GCP
+      debug:
+        msg: "Costos de GCP: {{ gcp_billing_info.cost }} USD"

@@ -1,0 +1,11 @@
+---
+- name: Consolidar gastos multi-nube
+  hosts: localhost
+  tasks:
+    - name: Calcular total de costos
+      set_fact:
+        total_cost: "{{ aws_costs.json['ResultsByTime'][0]['Total']['BlendedCost']['Amount'] | float + azure_costs.json['properties']['rows'][0][0] | float + gcp_billing_info.cost | float }}"
+
+    - name: Mostrar total consolidado
+      debug:
+        msg: "Gasto Total Multi-Nube: {{ total_cost }} USD"
