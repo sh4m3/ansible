@@ -1,0 +1,58 @@
+---
+- name: Configuración de Active Directory en Windows
+  hosts: domain_controllers
+  gather_facts: no
+  vars_prompt:
+    - name: "client_name"
+      prompt: "Introduce el nombre del cliente"
+      private: no
+    - name: "ou_name"
+      prompt: "Introduce el nombre de la Unidad Organizativa (OU)"
+      private: no
+    - name: "num_users"
+      prompt: "Introduce el número de usuarios a crear"
+      private: no
+  vars:
+    domain_name: "CLOUD.GRP"
+    group_name: "{{ client_name | replace(' ', '') }}GRP"
+    default_user_password: "ContraseñaDeUsuario"  # Contraseña inicial para los nuevos usuarios
+
+  tasks:
+    - name: Verificar conectividad con el servidor de dominio
+      win_ping:
+
+    - name: Crear la Unidad Organizativa (OU)
+      win_ad_ou:
+        name: "{{ ou_name }}"
+        domain_name: "{{ domain_name }}"
+        state: present
+
+    - name: Crear grupo en la OU
+      win_ad_group:
+        name: "{{ group_name }}"
+        scope: Global
+        type: Security
+        path: "OU={{ ou_name }},DC=CLOUD,DC=GRP"
+        domain_name: "{{ domain_name }}"
+        state: present
+
+    - name: Crear usuarios en la OU
+      win_ad_user:
+        name: "{{ client_name }}{{ '%02d' | format(item) }}"  # Formato para usuario con número
+        given_name: "{{ client_name }}"
+        surname: "Puesto {{ '%02d' | format(item) }}"  # Apellido como "Puesto 01", "Puesto 02", etc.
+        path: "OU={{ ou_name }},DC=CLOUD,DC=GRP"
+        domain_name: "{{ domain_name }}"
+        user_password: "{{ default_user_password }}"  # Contraseña inicial definida en la plantilla
+        password_never_expires: yes
+        state: present
+      loop: "{{ range(1, num_users + 1) | list }}"
+
+    - name: Añadir usuarios al grupo
+      win_ad_group_membership:
+        name: "{{ group_name }}"
+        members:
+          - "{{ client_name }}{{ '%02d' | format(item) }}"
+        domain_name: "{{ domain_name }}"
+        state: present
+      loop: "{{ range(1, num_users + 1) | list }}"
