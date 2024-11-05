@@ -1,6 +1,6 @@
 ---
 - name: Configuración de Active Directory en Windows
-  hosts: domain_controllers
+  hosts: all
   gather_facts: no
   vars_prompt:
     - name: "client_name"
