@@ -34,13 +34,22 @@
         Import-Module ActiveDirectory
         $password = ConvertTo-SecureString "{{ default_user_password }}" -AsPlainText -Force
         for ($i = 1; $i -le {{ num_users }}; $i++) {
-          $username = "{{ client_name }}{0:D2}" -f $i
+          # Formato de nombre de inicio de sesión (SamAccountName)
+          $username = ("{{ client_name }}{0:D2}" -f $i).ToLower()
           $fullname = "{{ client_name }} Puesto {0:D2}" -f $i
           $surname = "Puesto " + "{0:D2}" -f $i
+          
+          # Verificación y creación del usuario
           if (-not (Get-ADUser -Filter "SamAccountName -eq '$username'" -ErrorAction SilentlyContinue)) {
-            New-ADUser -Name $fullname -GivenName "{{ client_name }}" -Surname $surname `
-                       -SamAccountName $username -AccountPassword $password -Path "OU={{ ou_name }},DC=GREENSYS,DC=GRP" `
-                       -Enabled $true -PasswordNeverExpires $true
+            New-ADUser -Name $fullname `
+                       -GivenName "{{ client_name }}" `
+                       -Surname $surname `
+                       -SamAccountName $username `
+                       -UserPrincipalName "$username@{{ domain_name }}" `
+                       -AccountPassword $password `
+                       -Path "OU={{ ou_name }},DC=GREENSYS,DC=GRP" `
+                       -Enabled $true `
+                       -PasswordNeverExpires $true
           }
         }
       args:
@@ -50,7 +59,7 @@
       win_shell: |
         Import-Module ActiveDirectory
         for ($i = 1; $i -le {{ num_users }}; $i++) {
-          $username = "{{ client_name }}{0:D2}" -f $i
+          $username = ("{{ client_name }}{0:D2}" -f $i).ToLower()
           Add-ADGroupMember -Identity "{{ group_name }}" -Members $username
         }
       args:
