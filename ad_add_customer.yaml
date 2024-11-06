@@ -1,5 +1,5 @@
 ---
-- name: Configuración de Active Directory en Windows usando PowerShell
+- name: Configuración de Active Directory en Windows usando PowerShell y Copy-GPO
   hosts: all
   gather_facts: no
   vars:
@@ -57,7 +57,7 @@
       args:
         executable: powershell
 
-     - name: Crear una copia de la Default Domain Policy y asignarla a la OU usando Copy-GPO
+    - name: Crear una copia de la Default Domain Policy y asignarla a la OU usando Copy-GPO
       win_shell: |
         Import-Module GroupPolicy
         
