@@ -1,17 +1,7 @@
 ---
 - name: Configuración de Active Directory en Windows usando PowerShell
-  hosts: all
+  hosts: domain_controllers
   gather_facts: no
-  vars_prompt:
-    - name: "client_name"
-      prompt: "Introduce el nombre del cliente"
-      private: no
-    - name: "ou_name"
-      prompt: "Introduce el nombre de la Unidad Organizativa (OU)"
-      private: no
-    - name: "num_users"
-      prompt: "Introduce el número de usuarios a crear"
-      private: no
   vars:
     domain_name: "GREENSYS.GRP"
     group_name: "{{ client_name | replace(' ', '') }}GRP"  # Nombre del grupo basado en el nombre del cliente
