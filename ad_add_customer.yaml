@@ -5,7 +5,7 @@
   vars:
     domain_name: "GREENSYS.GRP"
     group_name: "{{ client_name | replace(' ', '') }}GRP"  # Nombre del grupo basado en el nombre del cliente
-
+    gpo_name: "GPO {{ client_name }}"  # Nombre de la GPO clonada
   tasks:
     - name: Verificar conectividad con el servidor de dominio
       win_ping:
@@ -54,5 +54,28 @@
             Add-ADGroupMember -Identity "{{ group_name }}" -Members $username
           }
         }
+      args:
+        executable: powershell
+
+    - name: Crear una copia de la Default Domain Policy y asignarla a la OU
+      win_shell: |
+        Import-Module GroupPolicy
+        $backupPath = "C:\\GPOBackup"  # Ruta temporal para la copia de seguridad
+        New-Item -ItemType Directory -Force -Path $backupPath
+        
+        # Backup de la Default Domain Policy
+        $defaultGpo = "Default Domain Policy"
+        Backup-Gpo -Name $defaultGpo -Path $backupPath -ErrorAction Stop
+
+        # Importar la GPO con el nuevo nombre
+        $gpoId = (Get-GPO -Name $defaultGpo).Id
+        New-GPO -Name "{{ gpo_name }}" -Domain "{{ domain_name }}" -Comment "Copia de Default Domain Policy para {{ client_name }}" -SourceGuid $gpoId
+
+        # Enlazar la GPO a la OU
+        $ouPath = "OU={{ ou_name }},DC=GREENSYS,DC=GRP"
+        New-GPLink -Name "{{ gpo_name }}" -Target $ouPath -LinkEnabled Yes
+
+        # Limpieza de archivos temporales
+        Remove-Item -Recurse -Force $backupPath
       args:
         executable: powershell
