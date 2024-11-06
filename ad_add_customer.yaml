@@ -13,7 +13,7 @@
       prompt: "Introduce el número de usuarios a crear"
       private: no
   vars:
-    domain_name: "CLOUD.GRP"
+    domain_name: "GREENSYS.GRP"
     group_name: "{{ client_name | replace(' ', '') }}GRP"  # Nombre del grupo basado en el nombre del cliente
     default_user_password: "Y3lm020."  # Contraseña predeterminada para nuevos usuarios
 
@@ -24,13 +24,13 @@
     - name: Crear la Unidad Organizativa (OU)
       microsoft.ad.ou:
         name: "{{ ou_name }}"
-        path: "DC=CLOUD,DC=GRP"
+        path: "DC=GREENSYS,DC=GRP"
         state: present
 
     - name: Crear grupo en la OU
       microsoft.ad.group:
         name: "{{ group_name }}"
-        path: "OU={{ ou_name }},DC=CLOUD,DC=GRP"
+        path: "OU={{ ou_name }},DC=GREENSYS,DC=GRP"
         scope: Global
         type: Security
         state: present
@@ -40,7 +40,7 @@
         name: "{{ client_name }}{{ '%02d' | format(item) }}"  # Formato para usuario con número
         given_name: "{{ client_name }}"
         surname: "Puesto {{ '%02d' | format(item) }}"  # Apellido como "Puesto 01", "Puesto 02", etc.
-        path: "OU={{ ou_name }},DC=CLOUD,DC=GRP"
+        path: "OU={{ ou_name }},DC=GREENSYS,DC=GRP"
         password: "{{ default_user_password }}"
         password_never_expires: yes
         state: present
