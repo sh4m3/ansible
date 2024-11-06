@@ -59,7 +59,9 @@
 
     - name: Crear una copia de la Default Domain Policy y asignarla a la OU usando Copy-GPO
       win_shell: |
-        Import-Module GroupPolicy
+        #Import-Module GroupPolicy
+        Start-Process powershell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -Command "Import-Module GroupPolicy; Copy-GPO -SourceName \"Default Domain Policy\" -TargetName \"{{ gpo_name }}\"" ' -Verb RunAs
+
         
         # Crear una copia de la Default Domain Policy
         Copy-GPO -SourceName "Default Domain Policy" -TargetName "{{ gpo_name }}" -ErrorAction Stop
