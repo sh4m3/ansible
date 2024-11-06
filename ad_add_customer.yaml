@@ -67,7 +67,7 @@
         #Backup-Gpo -Name 'Default Domain Policy' -Path $backupPath -ErrorAction Stop
         
         # Restaurar la GPO con un nuevo nombre
-        Restore-Gpo -Name "{{ gpo_name }}" -Path $backupPath -TargetDomain "{{ domain_name }}" -CreateIfNeeded -ErrorAction Stop
+        Restore-Gpo -Name "{{ gpo_name }}" -Path $backupPath -CreateIfNeeded -ErrorAction Stop
         
         # Enlazar la GPO a la OU recién creada
         $ouPath = "OU={{ ou_name }},DC=GREENSYS,DC=GRP"
