@@ -64,7 +64,7 @@
 
         
         # Crear una copia de la Default Domain Policy
-        Copy-GPO -SourceName "Default Domain Policy" -TargetName "{{ gpo_name }}" -ErrorAction Stop
+        #Copy-GPO -SourceName "Default Domain Policy" -TargetName "{{ gpo_name }}" -ErrorAction Stop
         
         # Enlazar la nueva GPO a la OU especificada
         $ouPath = "OU={{ ou_name }},DC=GREENSYS,DC=GRP"
