@@ -1,5 +1,5 @@
 ---
-- name: Configuración de Active Directory en Windows usando microsoft.ad
+- name: Configuración de Active Directory en Windows usando PowerShell
   hosts: all
   gather_facts: no
   vars_prompt:
@@ -15,41 +15,52 @@
   vars:
     domain_name: "GREENSYS.GRP"
     group_name: "{{ client_name | replace(' ', '') }}GRP"  # Nombre del grupo basado en el nombre del cliente
-    default_user_password: "Y3lm020."  # Contraseña predeterminada para nuevos usuarios
+    default_user_password: "ContraseñaDeUsuario"  # Contraseña predeterminada para los nuevos usuarios
 
   tasks:
     - name: Verificar conectividad con el servidor de dominio
       win_ping:
 
-    - name: Crear la Unidad Organizativa (OU)
-      microsoft.ad.ou:
-        name: "{{ ou_name }}"
-        path: "DC=GREENSYS,DC=GRP"
-        state: present
+    - name: Crear la Unidad Organizativa (OU) usando PowerShell
+      win_shell: |
+        Import-Module ActiveDirectory
+        if (-not (Get-ADOrganizationalUnit -Filter "Name -eq '{{ ou_name }}'" -ErrorAction SilentlyContinue)) {
+          New-ADOrganizationalUnit -Name "{{ ou_name }}" -Path "DC=GREENSYS,DC=GRP"
+        }
+      args:
+        executable: powershell
 
-    - name: Crear grupo en la OU
-      microsoft.ad.group:
-        name: "{{ group_name }}"
-        path: "OU={{ ou_name }},DC=GREENSYS,DC=GRP"
-        scope: Global
-        type: Security
-        state: present
+    - name: Crear grupo en la OU usando PowerShell
+      win_shell: |
+        Import-Module ActiveDirectory
+        if (-not (Get-ADGroup -Filter "Name -eq '{{ group_name }}'" -ErrorAction SilentlyContinue)) {
+          New-ADGroup -Name "{{ group_name }}" -GroupScope Global -GroupCategory Security -Path "OU={{ ou_name }},DC=GREENSYS,DC=GRP"
+        }
+      args:
+        executable: powershell
 
-    - name: Crear usuarios en la OU
-      microsoft.ad.user:
-        name: "{{ client_name }}{{ '%02d' | format(item) }}"  # Formato para usuario con número
-        given_name: "{{ client_name }}"
-        surname: "Puesto {{ '%02d' | format(item) }}"  # Apellido como "Puesto 01", "Puesto 02", etc.
-        path: "OU={{ ou_name }},DC=GREENSYS,DC=GRP"
-        password: "{{ default_user_password }}"
-        password_never_expires: yes
-        state: present
-      loop: "{{ range(1, num_users + 1) | list }}"
+    - name: Crear usuarios en la OU usando PowerShell
+      win_shell: |
+        Import-Module ActiveDirectory
+        $password = ConvertTo-SecureString "{{ default_user_password }}" -AsPlainText -Force
+        for ($i = 1; $i -le {{ num_users }}; $i++) {
+          $username = "{{ client_name }}{0:D2}" -f $i
+          $fullname = "{{ client_name }} Puesto {0:D2}" -f $i
+          if (-not (Get-ADUser -Filter "SamAccountName -eq '$username'" -ErrorAction SilentlyContinue)) {
+            New-ADUser -Name $fullname -GivenName "{{ client_name }}" -Surname "Puesto {0:D2}" -f $i `
+                       -SamAccountName $username -AccountPassword $password -Path "OU={{ ou_name }},DC=GREENSYS,DC=GRP" `
+                       -Enabled $true -PasswordNeverExpires $true
+          }
+        }
+      args:
+        executable: powershell
 
-    - name: Añadir usuarios al grupo
-      microsoft.ad.group_membership:
-        name: "{{ group_name }}"
-        members:
-          - "{{ client_name }}{{ '%02d' | format(item) }}"
-        state: present
-      loop: "{{ range(1, num_users + 1) | list }}"
+    - name: Añadir usuarios al grupo usando PowerShell
+      win_shell: |
+        Import-Module ActiveDirectory
+        for ($i = 1; $i -le {{ num_users }}; $i++) {
+          $username = "{{ client_name }}{0:D2}" -f $i
+          Add-ADGroupMember -Identity "{{ group_name }}" -Members $username
+        }
+      args:
+        executable: powershell
