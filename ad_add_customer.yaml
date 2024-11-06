@@ -5,7 +5,6 @@
   vars:
     domain_name: "GREENSYS.GRP"
     group_name: "{{ client_name | replace(' ', '') }}GRP"  # Nombre del grupo basado en el nombre del cliente
-    default_user_password: "ContraseñaDeUsuario"  # Contraseña predeterminada para los nuevos usuarios
 
   tasks:
     - name: Verificar conectividad con el servidor de dominio
