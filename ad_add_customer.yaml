@@ -76,6 +76,6 @@
         New-GPLink -Name "{{ gpo_name }}" -Target $ouPath -LinkEnabled Yes
 
         # Limpieza de archivos temporales
-        Remove-Item -Recurse -Force $backupPath
+        #Remove-Item -Recurse -Force $backupPath
       args:
         executable: powershell
