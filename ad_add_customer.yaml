@@ -36,8 +36,9 @@
         for ($i = 1; $i -le {{ num_users }}; $i++) {
           $username = "{{ client_name }}{0:D2}" -f $i
           $fullname = "{{ client_name }} Puesto {0:D2}" -f $i
+          $surname = "Puesto " + "{0:D2}" -f $i
           if (-not (Get-ADUser -Filter "SamAccountName -eq '$username'" -ErrorAction SilentlyContinue)) {
-            New-ADUser -Name $fullname -GivenName "{{ client_name }}" -Surname "Puesto {0:D2}" -f $i `
+            New-ADUser -Name $fullname -GivenName "{{ client_name }}" -Surname $surname `
                        -SamAccountName $username -AccountPassword $password -Path "OU={{ ou_name }},DC=GREENSYS,DC=GRP" `
                        -Enabled $true -PasswordNeverExpires $true
           }
