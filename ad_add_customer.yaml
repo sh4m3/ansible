@@ -29,7 +29,7 @@
       args:
         executable: powershell
 
-    - name: Crear usuarios en la OU usando PowerShell con prefijo en el nombre de usuario
+    - name: Crear usuarios en la OU usando PowerShell y añadirlos al grupo
       win_shell: |
         Import-Module ActiveDirectory
         $password = ConvertTo-SecureString "{{ default_user_password }}" -AsPlainText -Force
@@ -50,17 +50,10 @@
                        -Path "OU={{ ou_name }},DC=GREENSYS,DC=GRP" `
                        -Enabled $true `
                        -PasswordNeverExpires $true
+            
+            # Añadir el usuario al grupo
+            Add-ADGroupMember -Identity "{{ group_name }}" -Members $username
           }
-        }
-      args:
-        executable: powershell
-
-    - name: Añadir usuarios al grupo usando PowerShell
-      win_shell: |
-        Import-Module ActiveDirectory
-        for ($i = 1; $i -le {{ num_users }}; $i++) {
-          $username = "{{ user_prefix }}{{ client_name }}{0:D2}" -f $i
-          Add-ADGroupMember -Identity "{{ group_name }}" -Members $username
         }
       args:
         executable: powershell
