@@ -65,13 +65,8 @@
         
         
         # Hacer respaldo de la Default Domain Policy y verificar que el respaldo existe
-        Backup-Gpo -Name 'Default Domain Policy' -Path $backupPath -ErrorAction Stop
-        $backup = Get-GPOBackup -Path $backupPath | Where-Object { $_.DisplayName -eq 'Default Domain Policy' }
+         Backup-Gpo -Name "Default Domain Policy" -Path $backupPath -ErrorAction Stop
         
-        if ($null -eq $backup) {
-          Write-Error "No se pudo encontrar un respaldo de la Default Domain Policy en $backupPath"
-          exit 1
-        }
 
         # Importar la configuración de la Default Domain Policy a la nueva GPO usando el BackupId
         Import-Gpo -BackupId $backup.BackupId -TargetName "{{ gpo_name }}" -ErrorAction Stop
