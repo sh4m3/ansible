@@ -58,9 +58,10 @@
         executable: powershell
 
     - name: Crear una copia de la Default Domain Policy y asignarla a la OU usando Copy-GPO
+      become: yes
+      become_method: runas
       win_shell: |
-        become: yes
-        become_method: runas
+      
         Import-Module GroupPolicy
 
         
