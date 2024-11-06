@@ -57,25 +57,15 @@
       args:
         executable: powershell
 
-    - name: Crear y asignar una copia de la Default Domain Policy a la OU
+     - name: Crear una copia de la Default Domain Policy y asignarla a la OU usando Copy-GPO
       win_shell: |
         Import-Module GroupPolicy
-        $backupPath = 'C:\\tmp'  # Ruta temporal para la copia de seguridad
-        New-Item -ItemType Directory -Force -Path $backupPath
         
-        
-        # Hacer respaldo de la Default Domain Policy y verificar que el respaldo existe
-         Backup-Gpo -Name "Default Domain Policy" -Path $backupPath -ErrorAction Stop
-        
-
-        # Importar la configuración de la Default Domain Policy a la nueva GPO usando el BackupId
-        Import-Gpo -BackupId $backup.BackupId -TargetName "{{ gpo_name }}" -ErrorAction Stop
+        # Crear una copia de la Default Domain Policy
+        Copy-GPO -SourceName "Default Domain Policy" -TargetName "{{ gpo_name }}" -Domain "{{ domain_name }}" -ErrorAction Stop
         
         # Enlazar la nueva GPO a la OU especificada
         $ouPath = "OU={{ ou_name }},DC=GREENSYS,DC=GRP"
         New-GPLink -Name "{{ gpo_name }}" -Target $ouPath -LinkEnabled Yes
-
-        # Limpieza de archivos temporales
-        #Remove-Item -Recurse -Force $backupPath
       args:
         executable: powershell
