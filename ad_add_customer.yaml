@@ -1,6 +1,6 @@
 ---
 - name: Configuración de Active Directory en Windows usando PowerShell
-  hosts: domain_controllers
+  hosts: all
   gather_facts: no
   vars:
     domain_name: "GREENSYS.GRP"
