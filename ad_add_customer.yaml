@@ -57,14 +57,16 @@
       args:
         executable: powershell
 
-    - name: Copiar la Default Domain Policy y asignarla a la OU usando Copy-GPO
-      win_shell: |
-        Import-Module GroupPolicy
-        Copy-GPO -SourceName "Default Domain Policy" -TargetName "{{ gpo_name }}" 
-        
-        $ouPath = "OU={{ ou_name }},DC=GREENSYS,DC=GRP"
-        New-GPLink -Name "{{ gpo_name }}" -Target $ouPath -LinkEnabled Yes
-      become: yes
-      become_method: runas
-      args:
-        executable: powershell
+    - name: Copiar la Default Domain Policy y asignarla a la OU usando win_psexec
+      win_psexec:
+        command: |
+          Import-Module GroupPolicy;
+          Copy-GPO -SourceName "Default Domain Policy" -TargetName "{{ gpo_name }}" -Domain "{{ domain_name }}";
+          $ouPath = "OU={{ ou_name }},DC=GREENSYS,DC=GRP";
+          New-GPLink -Name "{{ gpo_name }}" -Target $ouPath -LinkEnabled Yes
+        executable: powershell.exe
+      register: gpo_copy_output
+
+    - name: Mostrar salida de la copia de GPO
+      debug:
+        var: gpo_copy_output.stdout
