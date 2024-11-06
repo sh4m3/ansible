@@ -29,13 +29,13 @@
       args:
         executable: powershell
 
-    - name: Crear usuarios en la OU usando PowerShell
+    - name: Crear usuarios en la OU usando PowerShell con prefijo en el nombre de usuario
       win_shell: |
         Import-Module ActiveDirectory
         $password = ConvertTo-SecureString "{{ default_user_password }}" -AsPlainText -Force
         for ($i = 1; $i -le {{ num_users }}; $i++) {
-          # Formato de nombre de inicio de sesión (SamAccountName)
-          $username = ("{{ client_name }}{0:D2}" -f $i).ToLower()
+          # Formato de nombre de inicio de sesión (SamAccountName) con prefijo
+          $username = "{{ user_prefix }}{{ client_name }}{0:D2}" -f $i
           $fullname = "{{ client_name }} Puesto {0:D2}" -f $i
           $surname = "Puesto " + "{0:D2}" -f $i
           
@@ -59,7 +59,7 @@
       win_shell: |
         Import-Module ActiveDirectory
         for ($i = 1; $i -le {{ num_users }}; $i++) {
-          $username = ("{{ client_name }}{0:D2}" -f $i).ToLower()
+          $username = "{{ user_prefix }}{{ client_name }}{0:D2}" -f $i
           Add-ADGroupMember -Identity "{{ group_name }}" -Members $username
         }
       args:
