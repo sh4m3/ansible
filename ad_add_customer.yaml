@@ -57,23 +57,30 @@
       args:
         executable: powershell
 
-    - name: Crear una copia de la Default Domain Policy y asignarla a la OU
+    - name: Crear y asignar una copia de la Default Domain Policy a la OU
       win_shell: |
         Import-Module GroupPolicy
         $backupPath = 'C:\\tmp'  # Ruta temporal para la copia de seguridad
-        #New-Item -ItemType Directory -Force -Path $backupPath
+        New-Item -ItemType Directory -Force -Path $backupPath
         
-        # Backup de la Default Domain Policy
-        #Backup-Gpo -Name 'Default Domain Policy' -Path $backupPath -ErrorAction Stop
         
-        # Restaurar la GPO con un nuevo nombre
-        Import-Gpo -BackupId $backupId -TargetName "{{ gpo_name }}" -ErrorAction Stop
+        # Hacer respaldo de la Default Domain Policy y verificar que el respaldo existe
+        Backup-Gpo -Name 'Default Domain Policy' -Path $backupPath -ErrorAction Stop
+        $backup = Get-GPOBackup -Path $backupPath | Where-Object { $_.DisplayName -eq 'Default Domain Policy' }
         
-        # Enlazar la GPO a la OU recién creada
+        if ($null -eq $backup) {
+          Write-Error "No se pudo encontrar un respaldo de la Default Domain Policy en $backupPath"
+          exit 1
+        }
+
+        # Importar la configuración de la Default Domain Policy a la nueva GPO usando el BackupId
+        Import-Gpo -BackupId $backup.BackupId -TargetName "{{ gpo_name }}" -ErrorAction Stop
+        
+        # Enlazar la nueva GPO a la OU especificada
         $ouPath = "OU={{ ou_name }},DC=GREENSYS,DC=GRP"
         New-GPLink -Name "{{ gpo_name }}" -Target $ouPath -LinkEnabled Yes
 
         # Limpieza de archivos temporales
-        #Remove-Item -Recurse -Force $backupPath
+        Remove-Item -Recurse -Force $backupPath
       args:
         executable: powershell
