@@ -66,7 +66,7 @@
         dest: C:\tmp\copy_gpo.ps1
 
     - name: Ejecutar el script con win_shell
-      win_shell: powershell.exe -ExecutionPolicy Bypass -File C:\copy_gpo.ps1
+      win_shell: powershell.exe -ExecutionPolicy Bypass -File C:\tmp\copy_gpo.ps1
   
 
     - name: Eliminar el script después de la ejecución
