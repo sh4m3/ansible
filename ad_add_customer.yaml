@@ -1,44 +1,50 @@
 ---
-- name: Configuración de Active Directory en Windows usando PowerShell y Copy-GPO
-  hosts: all
+- name: Configuración de Active Directory en Windows con Tarea Programada para Copiar la GPO
+  hosts: windows
   gather_facts: no
   vars:
     domain_name: "GREENSYS.GRP"
     group_name: "{{ client_name | replace(' ', '') }}GRP"  # Nombre del grupo basado en el nombre del cliente
     gpo_name: "GPO {{ client_name }}"  # Nombre de la GPO clonada
+    ou_name: "OU_Test"  # Nombre de la OU
   tasks:
-    - name: Verificar conectividad con el servidor de dominio
-      win_ping:
+    - name: Mostrar un mensaje para confirmar la sesión
+      win_shell: |
+        Write-Output "Ejecutando como Administrador"
+      become: yes
+      become_method: runas
 
-    - name: Crear la Unidad Organizativa (OU) usando PowerShell
+    - name: Crear la Unidad Organizativa (OU) en Active Directory
       win_shell: |
         Import-Module ActiveDirectory
         if (-not (Get-ADOrganizationalUnit -Filter "Name -eq '{{ ou_name }}'" -ErrorAction SilentlyContinue)) {
           New-ADOrganizationalUnit -Name "{{ ou_name }}" -Path "DC=GREENSYS,DC=GRP"
         }
+      become: yes
+      become_method: runas
       args:
         executable: powershell
 
-    - name: Crear grupo en la OU usando PowerShell
+    - name: Crear grupo en la OU
       win_shell: |
         Import-Module ActiveDirectory
         if (-not (Get-ADGroup -Filter "Name -eq '{{ group_name }}'" -ErrorAction SilentlyContinue)) {
           New-ADGroup -Name "{{ group_name }}" -GroupScope Global -GroupCategory Security -Path "OU={{ ou_name }},DC=GREENSYS,DC=GRP"
         }
+      become: yes
+      become_method: runas
       args:
         executable: powershell
 
-    - name: Crear usuarios en la OU usando PowerShell y añadirlos al grupo
+    - name: Crear usuarios en la OU y añadirlos al grupo
       win_shell: |
         Import-Module ActiveDirectory
         $password = ConvertTo-SecureString "{{ default_user_password }}" -AsPlainText -Force
         for ($i = 1; $i -le {{ num_users }}; $i++) {
-          # Formato de nombre de inicio de sesión (SamAccountName) con prefijo
           $username = "{{ user_prefix }}{{ client_name }}{0:D2}" -f $i
           $fullname = "{{ client_name }} Puesto {0:D2}" -f $i
           $surname = "Puesto " + "{0:D2}" -f $i
           
-          # Verificación y creación del usuario
           if (-not (Get-ADUser -Filter "SamAccountName -eq '$username'" -ErrorAction SilentlyContinue)) {
             New-ADUser -Name $fullname `
                        -GivenName "{{ client_name }}" `
@@ -50,23 +56,32 @@
                        -Enabled $true `
                        -PasswordNeverExpires $true
             
-            # Añadir el usuario al grupo
             Add-ADGroupMember -Identity "{{ group_name }}" -Members $username
           }
         }
+      become: yes
+      become_method: runas
       args:
         executable: powershell
 
-    - name: Copiar la Default Domain Policy y asignarla a la OU usando win_psexec
-      win_psexec:
-        command: |
-          Import-Module GroupPolicy;
-          Copy-GPO -SourceName "Default Domain Policy" -TargetName "{{ gpo_name }}" -Domain "{{ domain_name }}";
-          $ouPath = "OU={{ ou_name }},DC=GREENSYS,DC=GRP";
-          New-GPLink -Name "{{ gpo_name }}" -Target $ouPath -LinkEnabled Yes
-        executable: powershell.exe
-      register: gpo_copy_output
+    - name: Configurar tarea programada para copiar la Default Domain Policy
+      win_scheduled_task:
+        name: "Copy Default Domain Policy"
+        description: "Copia la Default Domain Policy a una nueva GPO y la asigna a la OU especificada"
+        actions:
+          - path: "powershell.exe"
+            arguments: "-NoProfile -ExecutionPolicy Bypass -Command 'Import-Module GroupPolicy; Copy-GPO -SourceName \"Default Domain Policy\" -TargetName \"{{ gpo_name }}\"; $ouPath = \"OU={{ ou_name }},DC=GREENSYS,DC=GRP\"; New-GPLink -Name \"{{ gpo_name }}\" -Target $ouPath -LinkEnabled Yes'"
+        trigger:
+          - type: once
+            start_boundary: "{{ (ansible_date_time.iso8601 | to_datetime('%Y-%m-%dT%H:%M:%SZ') + timedelta(seconds=30)).isoformat() }}"
+        enabled: yes
+      register: scheduled_task
 
-    - name: Mostrar salida de la copia de GPO
-      debug:
-        var: gpo_copy_output.stdout
+    - name: Esperar 10 segundos para que se complete la tarea programada
+      wait_for:
+        timeout: 10
+
+    - name: Eliminar la tarea programada después de la ejecución
+      win_scheduled_task:
+        name: "Copy Default Domain Policy"
+        state: absent
