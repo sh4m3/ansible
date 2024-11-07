@@ -59,8 +59,6 @@
             Add-ADGroupMember -Identity "{{ group_name }}" -Members $username
           }
         }
-      become: yes
-      become_method: runas
       args:
         executable: powershell
 
