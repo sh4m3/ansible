@@ -67,11 +67,6 @@
 
     - name: Ejecutar el script con win_shell
       win_shell: powershell.exe -ExecutionPolicy Bypass -File C:\tmp\copy_gpo.ps1
-      register: script_output
-
-    - name: Mostrar la salida del script PowerShell con saltos de línea
-      debug:
-        var: script_output.stdout_lines
 
     - name: Eliminar el script después de la ejecución
       win_file:
