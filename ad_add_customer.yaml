@@ -1,6 +1,6 @@
 ---
 - name: Configuración de Active Directory en Windows con Tarea Programada para Copiar la GPO
-  hosts: windows
+  hosts: all
   gather_facts: no
   vars:
     domain_name: "GREENSYS.GRP"
