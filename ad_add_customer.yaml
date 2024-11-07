@@ -64,24 +64,12 @@
       args:
         executable: powershell
 
-    - name: Configurar tarea programada para copiar la Default Domain Policy
-      win_scheduled_task:
-        name: "Copy Default Domain Policy"
-        description: "Copia la Default Domain Policy a una nueva GPO y la asigna a la OU especificada"
-        actions:
-          - path: "powershell.exe"
-            arguments: "-NoProfile -ExecutionPolicy Bypass -Command 'Import-Module GroupPolicy; Copy-GPO -SourceName \"Default Domain Policy\" -TargetName \"{{ gpo_name }}\"; $ouPath = \"OU={{ ou_name }},DC=GREENSYS,DC=GRP\"; New-GPLink -Name \"{{ gpo_name }}\" -Target $ouPath -LinkEnabled Yes'"
-        trigger:
-          - type: once
-            start_boundary: "{{ (ansible_date_time.iso8601 | to_datetime('%Y-%m-%dT%H:%M:%SZ') + timedelta(seconds=30)).isoformat() }}"
-        enabled: yes
-      register: scheduled_task
-
-    - name: Esperar 10 segundos para que se complete la tarea programada
-      wait_for:
-        timeout: 10
-
-    - name: Eliminar la tarea programada después de la ejecución
-      win_scheduled_task:
-        name: "Copy Default Domain Policy"
-        state: absent
+    - name: Copiar la Default Domain Policy y asignarla a la OU usando win_psexec
+      community.windows.win_psexec:
+        command: |
+          Import-Module GroupPolicy;
+          Copy-GPO -SourceName "Default Domain Policy" -TargetName "{{ gpo_name }}" -Domain "{{ domain_name }}";
+          $ouPath = "OU={{ ou_name }},DC=GREENSYS,DC=GRP";
+          New-GPLink -Name "{{ gpo_name }}" -Target $ouPath -LinkEnabled Yes
+        executable: powershell.exe
+      register: gpo_copy_output
