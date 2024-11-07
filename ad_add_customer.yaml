@@ -11,8 +11,6 @@
     - name: Mostrar un mensaje para confirmar la sesión
       win_shell: |
         Write-Output "Ejecutando como Administrador"
-      become: yes
-      become_method: runas
 
     - name: Crear la Unidad Organizativa (OU) en Active Directory
       win_shell: |
@@ -20,8 +18,6 @@
         if (-not (Get-ADOrganizationalUnit -Filter "Name -eq '{{ ou_name }}'" -ErrorAction SilentlyContinue)) {
           New-ADOrganizationalUnit -Name "{{ ou_name }}" -Path "DC=GREENSYS,DC=GRP"
         }
-      become: yes
-      become_method: runas
       args:
         executable: powershell
 
@@ -31,8 +27,6 @@
         if (-not (Get-ADGroup -Filter "Name -eq '{{ group_name }}'" -ErrorAction SilentlyContinue)) {
           New-ADGroup -Name "{{ group_name }}" -GroupScope Global -GroupCategory Security -Path "OU={{ ou_name }},DC=GREENSYS,DC=GRP"
         }
-      become: yes
-      become_method: runas
       args:
         executable: powershell
 
