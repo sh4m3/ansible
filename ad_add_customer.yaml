@@ -60,7 +60,7 @@
       win_copy:
         content: |
           Import-Module GroupPolicy
-          Copy-GPO -SourceName "Default Domain Policy" -TargetName "{{ gpo_name }}"
+          Copy-GPO -SourceName "Default Domain Policy" -TargetName "{{ gpo_name }}" -Domain "{{ domain_name }}"
           $ouPath = "OU={{ ou_name }},DC=GREENSYS,DC=GRP"
           New-GPLink -Name "{{ gpo_name }}" -Target $ouPath -LinkEnabled Yes
         dest: C:\tmp\copy_gpo.ps1
