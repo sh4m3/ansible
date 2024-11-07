@@ -71,6 +71,6 @@
 
     - name: Eliminar el script después de la ejecución
       win_file:
-        path: C:\copy_gpo.ps1
-        state: absent
+        #path: C:\copy_gpo.ps1
+        #state: absent
 
